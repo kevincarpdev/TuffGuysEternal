@@ -18,7 +18,10 @@ https://eternal-nft.vercel.app/
 
 ## Deployed Contract Address
 
-0x9b6dd9b898c300037c8C245e8E619a0934158065
+0x1f98b60093facfa7eed7f401c5a46becf79bff1c
+
+## Example Pinata Image URL
+https://tuffguys.mypinata.cloud/ipfs/QmV3rkVdW1njGM3RgZZAT276moPBYmE8TLPRQrogZa7HA1
 
 ## Project Description
 

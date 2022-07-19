@@ -1,0 +1,33 @@
+{
+  "name": "Tuff Guy #1",
+  "description": "Tuff Guys is a digital collection of 10,000 unique NFTs stored on the Ethereum blockchain as ERC-721 tokens. Here at Tuff Guys we aim to bring awareness to Mental Health via our donation roadmap and weekly seminars which are FREE for everyone. Stop by our discord server and learn more about our project! Tuff Guys Cry!",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Plain Pink"
+    },
+    {
+      "trait_type": "Clothes",
+      "value": "Knight"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Santa Hat"
+    },
+    {
+      "trait_type": "Mouthwear",
+      "value": "Blush"
+    },
+    {
+      "trait_type": "Tears",
+      "value": "Tears 3"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Default"
+    }
+  ],
+  "external_link": "https://tuffguysnft.com/",
+  "external_url": "https://tuffguysnft.com/",
+  "image": "https://tuffguys.mypinata.cloud/ipfs/QmTopgUL3wqCR8fQfbuPU5vZTdnxavGtVGGkcgPie4M3Ce"
+}

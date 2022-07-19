@@ -1,12 +1,9 @@
 import Head from 'next/head'
-
 import { useState, useEffect } from 'react'
 import { nftContractAddress } from '../config.js'
 import { ethers } from 'ethers'
 import axios from 'axios'
-
 import Loader from 'react-loader-spinner'
-
 import NFT from '../utils/TuffGuysNFT.json'
 
 const mint = () => {
@@ -16,6 +13,12 @@ const mint = () => {
 	const [txError, setTxError] = useState(null)
 	const [currentAccount, setCurrentAccount] = useState('')
 	const [correctNetwork, setCorrectNetwork] = useState(false)
+	const [name, setName] = useState('')
+	const [description, setDescription] = useState('')
+	const [attributes, setAttributes] = useState([])
+	const [imageUrl, setImageUrl] = useState(null)
+	const [uploading, setUploading] = useState(false)
+	const [loading, setLoading] = useState(false)
 
 	// Checks if wallet is connected
 	const checkIfWalletIsConnected = async () => {
@@ -84,14 +87,83 @@ const mint = () => {
 			setCorrectNetwork(true)
 		}
 	}
+	const sendJSONtoIPFS = async (ImgHash) => {
 
-	useEffect(() => {
-		checkIfWalletIsConnected()
-		checkCorrectNetwork()
-	}, [])
+		try {
 
+			const resJSON = await axios({
+				method: "post",
+				url: "https://api.pinata.cloud/pinning/pinJsonToIPFS",
+				data: {
+					"name": name,
+					"description": desc,
+					"image": ImgHash
+				},
+				headers: {
+					'pinata_api_key': `${process.env.REACT_APP_PINATA_API_KEY}`,
+					'pinata_secret_api_key': `${process.env.REACT_APP_PINATA_API_SECRET}`,
+				},
+			});
+
+			console.log("final ", `ipfs://${resJSON.data.IpfsHash}`)
+			const tokenURI = `ipfs://${resJSON.data.IpfsHash}`;
+			console.log("Token URI", tokenURI);
+			//mintNFT(tokenURI, currentAccount)   // pass the winner
+			mintCharacter()
+
+		} catch (error) {
+			console.log("JSON to IPFS: ")
+			console.log(error);
+		}
+
+
+	}
+	const sendFileToIPFS = async (e) => {
+
+		if (imageUrl) {
+			try {
+
+				const formData = new FormData();
+				formData.append("file", imageUrl);
+
+				const resFile = await axios({
+					method: "post",
+					url: "https://api.pinata.cloud/pinning/pinFileToIPFS",
+					data: formData,
+					headers: {
+						'pinata_api_key': `${process.env.REACT_APP_PINATA_API_KEY}`,
+						'pinata_secret_api_key': `${process.env.REACT_APP_PINATA_API_SECRET}`,
+						"Content-Type": "multipart/form-data"
+					},
+				});
+
+				const ImgHash = `ipfs://${resFile.data.IpfsHash}`;
+				console.log(ImgHash);
+				//Take a look at your Pinata Pinned section, you will see a new file added to you list.   
+				sendJSONtoIPFS(ImgHash)
+
+
+			} catch (error) {
+				console.log("Error sending File to IPFS: ")
+				console.log(error)
+			}
+		}
+	}
 	// Creates transaction to mint NFT on clicking Mint Character button
 	const mintCharacter = async () => {
+		// all data is required to create an NFT
+		if (!name && !description && attributes.length === 0 && !imageUrl) {
+			return
+		}
+
+		// collect all data into an object
+		const data = {
+			name,
+			image: imageUrl,
+			description,
+			attributes,
+		}
+
 		try {
 			const { ethereum } = window
 
@@ -103,8 +175,8 @@ const mint = () => {
 					NFT.abi,
 					signer
 				)
-				const address = await signer.getAddress();
-				let nftTx = await nftContract.safeMint(address)
+
+				let nftTx = await nftContract.mint_giveaway(1)
 				console.log('Mining....', nftTx.hash)
 				setMiningStatus(0)
 
@@ -146,7 +218,7 @@ const mint = () => {
 				let tokenUri = await nftContract.tokenURI(tokenId)
 				let data = await axios.get(tokenUri)
 				let meta = data.data
-
+				console.log("meta", meta)
 				setMiningStatus(1)
 				setMintedNFT(meta.image)
 			} else {
@@ -157,6 +229,37 @@ const mint = () => {
 			setTxError(error.message)
 		}
 	}
+	// Gets the minted NFT data
+	const fuseTuffGuy = async (tokenId) => {
+		try {
+			setFileImg("");
+		} catch (error) {
+			console.log(error)
+		}
+	}
+
+	// simple function to remove an attribute
+	function removeAttribute(index) {
+		let newAttributes = []
+		for (let i = 0; i < attributes.length; i++) {
+			if (i == index) {
+				continue
+			}
+
+			newAttributes.push(attributes[i])
+		}
+		setAttributes(newAttributes)
+	}
+
+
+	useEffect(() => {
+		checkIfWalletIsConnected()
+		checkCorrectNetwork()
+	}, [])
+
+	useEffect(() => {
+		console.log(imageUrl)
+	}, [imageUrl])
 
 	return (
 		<div className='flex flex-col items-center pt-32 bg-[#0B132B] text-[#d3d3d3] min-h-screen'>
@@ -186,12 +289,23 @@ const mint = () => {
 					Connect Wallet
 				</button>
 			) : correctNetwork ? (
-				<button
-					className='text-2xl font-bold py-3 px-12 bg-black shadow-lg shadow-[#6FFFE9] rounded-lg mb-10 hover:scale-105 transition duration-500 ease-in-out'
-					onClick={mintCharacter}
-				>
-					Mint
-				</button>
+				<>
+						{/* <form onSubmit={sendFileToIPFS}>
+							<input type="file" onChange={(e) => setImageUrl(e.target.files[0])} required />
+							<input type="text" onChange={(e) => setName(e.target.value)} placeholder='name' required value={name} />
+							<input type="text" onChange={(e) => setDesc(e.target.value)} placeholder="desc" required value={desc} />
+							<br />
+							<button className='bttn_ui me-3' type='submit' >Mint NFT</button>
+							<Link to="/system" style={{ textDecoration: "none" }}> <button className='bttn_ui mt-3' style={{ background: "#60e6ff", }}> Go to Admin Panal</button></Link>
+
+						</form> */}
+					<button
+						className='text-2xl font-bold py-3 px-12 bg-black shadow-lg shadow-[#6FFFE9] rounded-lg mb-10 hover:scale-105 transition duration-500 ease-in-out'
+						onClick={mintCharacter}
+					>
+						Mint
+					</button>
+				</>
 			) : (
 				<div className='flex flex-col justify-center items-center mb-20 font-bold text-2xl gap-y-3'>
 					<div>----------------------------------------</div>
@@ -211,12 +325,14 @@ const mint = () => {
 					</span>
 				</a>
 			</div>
+			
+			{/* Loading State */}
 			{loadingState === 0 ? (
 				miningStatus === 0 ? (
 					txError === null ? (
 						<div className='flex flex-col justify-center items-center'>
 							<div className='text-lg font-bold'>
-								Fusing Your Tuff
+								Minting Your Tuff
 							</div>
 							<Loader
 								className='flex justify-center items-center pt-12'
