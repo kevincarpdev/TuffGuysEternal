@@ -7,7 +7,7 @@ import axios from 'axios'
 
 import Loader from 'react-loader-spinner'
 
-import NFT from '../utils/EternalNFT.json'
+import NFT from '../utils/TuffGuysNFT.json'
 
 const mint = () => {
 	const [mintedNFT, setMintedNFT] = useState(null)
@@ -21,7 +21,7 @@ const mint = () => {
 	const checkIfWalletIsConnected = async () => {
 		const { ethereum } = window
 		if (ethereum) {
-			console.log('Got the ethereum obejct: ', ethereum)
+			console.log('Got the ethereum object: ', ethereum)
 		} else {
 			console.log('No Wallet found. Connect Wallet')
 		}
@@ -103,8 +103,8 @@ const mint = () => {
 					NFT.abi,
 					signer
 				)
-
-				let nftTx = await nftContract.createEternalNFT()
+				const address = await signer.getAddress();
+				let nftTx = await nftContract.safeMint(address)
 				console.log('Mining....', nftTx.hash)
 				setMiningStatus(0)
 
@@ -124,7 +124,7 @@ const mint = () => {
 				console.log("Ethereum object doesn't exist!")
 			}
 		} catch (error) {
-			console.log('Error minting character', error)
+			console.log('Error minting Tuff Guy', error)
 			setTxError(error.message)
 		}
 	}
@@ -161,7 +161,7 @@ const mint = () => {
 	return (
 		<div className='flex flex-col items-center pt-32 bg-[#0B132B] text-[#d3d3d3] min-h-screen'>
 			<Head>
-				<title>Eternal NFT</title>
+				<title>Tuff Guys</title>
 				<meta name='viewport' content='initial-scale=1.0, width=device-width' />
 			</Head>
 			<div className='trasition hover:rotate-180 hover:scale-105 transition duration-500 ease-in-out'>
@@ -176,7 +176,7 @@ const mint = () => {
 				</svg>
 			</div>
 			<h2 className='text-3xl font-bold mb-20 mt-12'>
-				Mint your Eternal Domain NFT!
+				Mint Your Tuff Guy
 			</h2>
 			{currentAccount === '' ? (
 				<button
@@ -190,7 +190,7 @@ const mint = () => {
 					className='text-2xl font-bold py-3 px-12 bg-black shadow-lg shadow-[#6FFFE9] rounded-lg mb-10 hover:scale-105 transition duration-500 ease-in-out'
 					onClick={mintCharacter}
 				>
-					Mint Character
+					Mint
 				</button>
 			) : (
 				<div className='flex flex-col justify-center items-center mb-20 font-bold text-2xl gap-y-3'>
@@ -207,7 +207,7 @@ const mint = () => {
 					target='_blank'
 				>
 					<span className='hover:underline hover:underline-offset-8 '>
-						View Collection on Rarible
+						View Your Tuff Guys on Rarible
 					</span>
 				</a>
 			</div>
@@ -216,7 +216,7 @@ const mint = () => {
 					txError === null ? (
 						<div className='flex flex-col justify-center items-center'>
 							<div className='text-lg font-bold'>
-								Processing your transaction
+								Fusing Your Tuff
 							</div>
 							<Loader
 								className='flex justify-center items-center pt-12'
@@ -235,7 +235,7 @@ const mint = () => {
 			) : (
 				<div className='flex flex-col justify-center items-center'>
 					<div className='font-semibold text-lg text-center mb-4'>
-						Your Eternal Domain Character
+						Your Tuff Guys
 					</div>
 					<img
 						src={mintedNFT}

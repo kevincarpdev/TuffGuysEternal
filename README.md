@@ -1,4 +1,4 @@
-# EternalNFT
+# Tuff Guys
 
 ## Table of Contents
   - [Deployed Website url](#deployed-website-url)

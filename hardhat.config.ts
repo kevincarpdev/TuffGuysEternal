@@ -6,7 +6,7 @@ const rinkebyUrl = process.env.ALCHEMY_RINKEBY_URL
 	: ''
 
 module.exports = {
-	solidity: '0.8.3',
+	solidity: '0.8.4',
 	networks: {
 		rinkeby: {
 			url: rinkebyUrl,
